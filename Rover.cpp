@@ -31,9 +31,11 @@ void Rover::create()
 	cubes[2].create(0.4, 0.4, 0.4, 1.1, 0.9, -4.1);
 	cubes[3].create(0.4, 0.4, 0.4, 3, 0.9, -4.1);
 
-	mainAxis = new MainAxis[2];
-	mainAxis[0].create(1.3, 1.1, -0.5);
-	mainAxis[1].create(3.2, 1.1, -0.5);
+	mainAxis = new Cylinder[2];
+	mainAxis[0].setColor(0, 0, 1);
+	mainAxis[1].setColor(0, 0, 1);
+	mainAxis[0].create(3, 1, 3.5, 0.1, 1.3, 1.1, -4);
+	mainAxis[1].create(3, 1, 3.5, 0.1, 3.2, 1.1, -4);
 
 	mainMount = new Cylinder;
 	mainMount->setColor(0.5, 1.0, 0);

@@ -12,7 +12,7 @@ class Rover
 	Body* body;
 	SideAxis* sideAxis;
 	Cuboid* cubes;
-	MainAxis* mainAxis;
+	Cylinder* mainAxis;
 	Cylinder* mainMount;
 	Cuboid* head;
 	Cylinder* camera;
