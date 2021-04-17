@@ -23,7 +23,6 @@
     <ClCompile Include="Cuboid.cpp" />
     <ClCompile Include="Cylinder.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MainAxis.cpp" />
     <ClCompile Include="Rover.cpp" />
     <ClCompile Include="SideAxis.cpp" />
     <ClCompile Include="Wheel.cpp" />
@@ -32,7 +31,6 @@
     <ClInclude Include="Body.h" />
     <ClInclude Include="Cuboid.h" />
     <ClInclude Include="Cylinder.h" />
-    <ClInclude Include="MainAxis.h" />
     <ClInclude Include="Rover.h" />
     <ClInclude Include="SideAxis.h" />
     <ClInclude Include="Wheel.h" />

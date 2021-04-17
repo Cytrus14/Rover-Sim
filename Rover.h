@@ -3,7 +3,6 @@
 #include "Body.h"
 #include "SideAxis.h"
 #include "Cuboid.h"
-#include "MainAxis.h"
 #include "Cylinder.h"
 
 class Rover
