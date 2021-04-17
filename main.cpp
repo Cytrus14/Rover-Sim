@@ -1,9 +1,5 @@
 #include <Windows.h>
-#include <stdlib.h>
-#include <cmath>
-#include "glew.h"
-#include "glut.h"
-#include "GL.H"
+#include "Rover.h"
 
 // angle of rotation for the camera direction
 float angle = 0.0;
@@ -46,12 +42,12 @@ void processSpecialKeys(int key, int xx, int yy) {
 
 	switch (key) {
 	case GLUT_KEY_LEFT:
-		angle -= 0.03f;
+		angle -= 0.1f;
 		lx = sin(angle);
 		lz = -cos(angle);
 		break;
 	case GLUT_KEY_RIGHT:
-		angle += 0.03f;
+		angle += 0.1f;
 		lx = sin(angle);
 		lz = -cos(angle);
 		break;
@@ -64,65 +60,18 @@ void processSpecialKeys(int key, int xx, int yy) {
 		z -= lz * fraction;
 		break;
 	case GLUT_KEY_PAGE_UP:
-		ly += 0.03f;
+		y += fraction;
 		break;
 	case GLUT_KEY_PAGE_DOWN:
-		ly -= 0.03f;
+		y -= fraction;
+		break;
+	case GLUT_KEY_HOME:
+		ly += 0.1f;
+		break;
+	case GLUT_KEY_END:
+		ly -= 0.1f;
 		break;
 	}
-}
-
-void cegla(double x, double y, double z)
-{
-	glColor3f(0.7, 0.13, 0.13);
-
-	//gora
-	glBegin(GL_TRIANGLE_STRIP);
-	glVertex3f(0 + x, 0 + y, 0 + z);
-	glVertex3f(0 + x, 12 + y, 0 + z);
-	glVertex3f(24 + x, 0 + y, 0 + z);
-	glVertex3f(24 + x, 12 + y, 0 + z);
-	glEnd();
-
-	//dol
-	glBegin(GL_TRIANGLE_STRIP);
-	glVertex3f(24 + x, 0 + y, 6 + z);
-	glVertex3f(24 + x, 12 + y, 6 + z);
-	glVertex3f(0 + x, 0 + y, 6 + z);
-	glVertex3f(0 + x, 12 + y, 6 + z);
-	glEnd();
-
-	//bok a
-	glBegin(GL_TRIANGLE_STRIP);
-	glVertex3f(24 + x, 0 + y, 0 + z);
-	glVertex3f(24 + x, 0 + y, 6 + z);
-	glVertex3f(0 + x, 0 + y, 0 + z);
-	glVertex3f(0 + x, 0 + y, 6 + z);
-	glEnd();
-
-	//bok b
-	glBegin(GL_TRIANGLE_STRIP);
-	glVertex3f(0 + x, 12 + y, 0 + z);
-	glVertex3f(0 + x, 12 + y, 6 + z);
-	glVertex3f(24 + x, 12 + y, 0 + z);
-	glVertex3f(24 + x, 12 + y, 6 + z);
-	glEnd();
-
-	//bok c
-	glBegin(GL_TRIANGLE_STRIP);
-	glVertex3f(0 + x, 0 + y, 0 + z);
-	glVertex3f(0 + x, 0 + y, 6 + z);
-	glVertex3f(0 + x, 12 + y, 0 + z);
-	glVertex3f(0 + x, 12 + y, 6 + z);
-	glEnd();
-
-	//bok d
-	glBegin(GL_TRIANGLE_STRIP);
-	glVertex3f(24 + x, 12 + y, 0 + z);
-	glVertex3f(24 + x, 12 + y, 6 + z);
-	glVertex3f(24 + x, 0 + y, 0 + z);
-	glVertex3f(24 + x, 0 + y, 6 + z);
-	glEnd();
 }
 
 
@@ -137,7 +86,10 @@ void renderScene(void) {
 	// Set the camera
 	gluLookAt(x, y, z, x + lx, y + ly, z + lz, 0.0f, 1.0f, 0.0f);
 
-	cegla(0,0,-100);
+	//cegla(0,0,-100);
+	Rover rover1;
+	rover1.create();
+
 
 	glutSwapBuffers();
 }

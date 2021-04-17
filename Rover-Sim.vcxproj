@@ -19,7 +19,17 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Body.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Rover.cpp" />
+    <ClCompile Include="SideAxis.cpp" />
+    <ClCompile Include="Wheel.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Body.h" />
+    <ClInclude Include="Rover.h" />
+    <ClInclude Include="SideAxis.h" />
+    <ClInclude Include="Wheel.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
