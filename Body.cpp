@@ -5,7 +5,7 @@ void Body::create(double offset_x, double offset_y, double offset_z)
 	if (!isObjectCreated)
 	{
 		//bottom
-		glColor3f(0.5, 0.5, 0.5);
+		glColor3f(1, 0.2, 0.2);
 		glBegin(GL_TRIANGLE_STRIP);
 		glVertex3f(0 + offset_x, 0 + offset_y, 0 + offset_z);
 		glVertex3f(x + offset_x, 0 + offset_y, 0 + offset_z);
@@ -22,7 +22,7 @@ void Body::create(double offset_x, double offset_y, double offset_z)
 		glEnd();
 
 		//side a
-		glColor3f(0.6, 0.6, 0.6);
+		glColor3f(1, 0.5, 0);
 		glBegin(GL_TRIANGLE_STRIP);
 		glVertex3f(0 + offset_x, 0 + offset_y, 0 + offset_z);
 		glVertex3f(0 + offset_x, y + offset_y, 0 + offset_z);
