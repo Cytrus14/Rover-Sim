@@ -1,5 +1,7 @@
 #include <Windows.h>
 #include "Rover.h"
+#include "ObjLoader.h"
+
 
 // angle of rotation for the camera direction
 float angle = 0.0;
@@ -9,6 +11,8 @@ float lx = 0.0f, lz = -1.0f, ly = 0.0f;
 float x = 0.0f, z = 5.0f, y = 0.0f;
 
 float red, green, blue;
+
+
 
 void changeSize(int w, int h) {
 
@@ -89,6 +93,9 @@ void renderScene(void) {
 	//cegla(0,0,-100);
 	Rover rover1;
 	rover1.create();
+
+	ObjLoader obj1("artifact.obj");
+	obj1.create();
 
 
 	glutSwapBuffers();
