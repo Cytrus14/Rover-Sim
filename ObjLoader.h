@@ -22,4 +22,6 @@ public:
 private:
 	vector<vector<GLfloat>> vertexCoordinates;
 	vector<vector<GLint>> vertexIndexes;
+	vector<vector<GLfloat>> textureCoordinates;
+	vector<vector<GLint>> textureIndexes;
 };

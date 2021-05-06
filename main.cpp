@@ -1,5 +1,7 @@
 #include <Windows.h>
 #include "Rover.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 #include "ObjLoader.h"
 
 
@@ -12,7 +14,7 @@ float x = 0.0f, z = 5.0f, y = 0.0f;
 
 float red, green, blue;
 
-
+unsigned int texture[1];
 
 void changeSize(int w, int h) {
 
@@ -91,11 +93,18 @@ void renderScene(void) {
 	gluLookAt(x, y, z, x + lx, y + ly, z + lz, 0.0f, 1.0f, 0.0f);
 
 	//cegla(0,0,-100);
+
 	Rover rover1;
 	rover1.create();
 
+	glEnable(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, texture[0]);
+
 	ObjLoader obj1("artifact.obj");
 	obj1.create();
+
+	glDisable(GL_TEXTURE_2D); // Wy³¹cz teksturowanie
 
 
 	glutSwapBuffers();
@@ -109,7 +118,7 @@ int main(int argc, char** argv) {
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(100, 100);
 	glutInitWindowSize(640, 640);
-	glutCreateWindow("Lighthouse3D- GLUT Tutorial");
+	glutCreateWindow("Rover Sim");
 
 	// register callbacks
 	glutDisplayFunc(renderScene);
@@ -121,6 +130,25 @@ int main(int argc, char** argv) {
 
 	// OpenGL init
 	glEnable(GL_DEPTH_TEST);
+
+	//textures
+	glGenTextures(1, &texture[0]);
+
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load("texture1.bmp", &width, &height, &nrChannels, 0);
+
+
+	glBindTexture(GL_TEXTURE_2D, texture[0]);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
 
 	// enter GLUT event processing cycle
 	glutMainLoop();
