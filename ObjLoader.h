@@ -17,6 +17,11 @@ public:
 		float y;
 		float z;
 	};
+	struct vt
+	{
+		float s;
+		float t;
+	};
 	ObjLoader(std::string fileName);
 	void create();
 private:

@@ -14,7 +14,7 @@ float x = 0.0f, z = 5.0f, y = 0.0f;
 
 float red, green, blue;
 
-unsigned int texture[1];
+unsigned int textures[2];
 
 void changeSize(int w, int h) {
 
@@ -97,14 +97,14 @@ void renderScene(void) {
 	Rover rover1;
 	rover1.create();
 
+	glBindTexture(GL_TEXTURE_2D, textures[0]);
 	glEnable(GL_TEXTURE_2D);
 
-	glBindTexture(GL_TEXTURE_2D, texture[0]);
+	ObjLoader rock("rock.obj");
+	rock.create();
 
-	ObjLoader obj1("artifact.obj");
-	obj1.create();
-
-	glDisable(GL_TEXTURE_2D); // Wy³¹cz teksturowanie
+	ObjLoader artifact("artifact.obj");
+	artifact.create();
 
 
 	glutSwapBuffers();
@@ -132,18 +132,18 @@ int main(int argc, char** argv) {
 	glEnable(GL_DEPTH_TEST);
 
 	//textures
-	glGenTextures(1, &texture[0]);
+	glEnable(GL_TEXTURE_2D);
+	glGenTextures(1, &textures[0]);
+	glBindTexture(GL_TEXTURE_2D, textures[0]);
 
 	int width, height, nrChannels;
-	unsigned char* data = stbi_load("texture1.bmp", &width, &height, &nrChannels, 0);
+	unsigned char* data = stbi_load("texture2.jpg", &width, &height, &nrChannels, 0);
 
-
-	glBindTexture(GL_TEXTURE_2D, texture[0]);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 
