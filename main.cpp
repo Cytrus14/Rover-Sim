@@ -14,7 +14,7 @@ float x = 0.0f, z = 5.0f, y = 0.0f;
 
 float red, green, blue;
 
-unsigned int textures[2];
+unsigned int textures[4];
 
 void changeSize(int w, int h) {
 
@@ -92,19 +92,39 @@ void renderScene(void) {
 	// Set the camera
 	gluLookAt(x, y, z, x + lx, y + ly, z + lz, 0.0f, 1.0f, 0.0f);
 
-	//cegla(0,0,-100);
-
+	//creating objects
 	Rover rover1;
 	rover1.create();
 
-	glBindTexture(GL_TEXTURE_2D, textures[0]);
 	glEnable(GL_TEXTURE_2D);
 
-	ObjLoader rock("rock.obj");
-	rock.create();
+	glBindTexture(GL_TEXTURE_2D, textures[0]);
+	ObjLoader rock1("Objects\\rock.obj");
+	rock1.create(0,0,25);
+	ObjLoader rock2("Objects\\rock.obj");
+	rock2.create(30,-8,-50);
+	ObjLoader rock3("Objects\\rock.obj");
+	rock3.create(-40,-25,-80);
+	ObjLoader rock4("Objects\\rock.obj");
+	rock4.create(20,0,10);
+	ObjLoader rock5("Objects\\rock.obj");
+	rock5.create(-70, -6, 20);
 
-	ObjLoader artifact("artifact.obj");
-	artifact.create();
+	glBindTexture(GL_TEXTURE_2D, textures[1]);
+	ObjLoader surface("Objects\\surface.obj");
+	surface.create(0,5.5,0);
+
+	glBindTexture(GL_TEXTURE_2D, textures[0]);
+	ObjLoader artifactBase("Objects\\artifact_base.obj");
+	artifactBase.create(-125,-35,-180);
+
+	glBindTexture(GL_TEXTURE_2D, textures[2]);
+	ObjLoader artifactRods("Objects\\artifact_rods.obj");
+	artifactRods.create(-125, -35, -180);
+
+	glBindTexture(GL_TEXTURE_2D, textures[3]);
+	ObjLoader artifactSphere("Objects\\artifact_sphere.obj");
+	artifactSphere.create(-125, -35, -180);
 
 
 	glutSwapBuffers();
@@ -132,24 +152,48 @@ int main(int argc, char** argv) {
 	glEnable(GL_DEPTH_TEST);
 
 	//textures
-	glEnable(GL_TEXTURE_2D);
-	glGenTextures(1, &textures[0]);
-	glBindTexture(GL_TEXTURE_2D, textures[0]);
-
 	int width, height, nrChannels;
-	unsigned char* data = stbi_load("texture2.jpg", &width, &height, &nrChannels, 0);
+	unsigned char* data;
+	glEnable(GL_TEXTURE_2D);
+	glGenTextures(4, textures);
 
-
+	//rock texture
+	glBindTexture(GL_TEXTURE_2D, textures[0]);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	data = stbi_load("Textures\\rock_texture.jpg", &width, &height, &nrChannels, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 
+	//surface texture
+	glBindTexture(GL_TEXTURE_2D, textures[1]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	data = stbi_load("Textures\\surface_texture.jpg", &width, &height, &nrChannels, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+
+	//artifact rod texture
+	glBindTexture(GL_TEXTURE_2D, textures[2]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	data = stbi_load("Textures\\artifact_rod_texture.jpg", &width, &height, &nrChannels, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+
+	//artifact sphere texture
+	glBindTexture(GL_TEXTURE_2D, textures[3]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	data = stbi_load("Textures\\artifact_sphere_texture.jpg", &width, &height, &nrChannels, 0);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-
 	// enter GLUT event processing cycle
 	glutMainLoop();
 

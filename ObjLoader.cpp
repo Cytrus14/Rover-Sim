@@ -7,21 +7,24 @@ ObjLoader::ObjLoader(std::string filenName)
 	GLfloat x, y, z;
 	GLint a, b, c;
 	char temp;
-	int i = 0;
 	while (getline(file,str))
 	{
+		//odczytywanie koordynatow wierzcholkow
 		if (str.substr(0, 2) == "v ")
 		{
-			vector<GLfloat> point;
-			istringstream inStr1(str.substr(2));
+			vector<GLfloat> point; //wektor zapisujacy koordynaty danego wierzcholka
+			istringstream inStr1(str.substr(2)); //kordynaty zaczynaja sie od drugiego znaku danej lini
 			inStr1 >> x;
 			inStr1 >> y;
 			inStr1 >> z;
+			//umieszczenie odczytanych wspolzednych w wektorze
 			point.push_back(x);
 			point.push_back(y);
 			point.push_back(z);
+			//umieszczenie wektora point w wektorze vertexCoordinates
 			vertexCoordinates.push_back(point);
 		}
+		//odczytywanie wspolrzednych tekstur
 		else if (str.substr(0, 2) == "vt")
 		{
 			vector<GLfloat> point2D;
@@ -32,7 +35,7 @@ ObjLoader::ObjLoader(std::string filenName)
 			point2D.push_back(y);
 			textureCoordinates.push_back(point2D);
 		}
-		//TODO: modify indexes reading method
+		//odczytywanie indeksow wierzcholkow i tekstur
 		else if (str.substr(0, 1) == "f")
 		{
 			vector<GLint> verIndexes;
@@ -47,6 +50,7 @@ ObjLoader::ObjLoader(std::string filenName)
 			inStr2 >> c;
 			inStr2 >> temp;
 			inStr2 >> z;
+			//pomniejszanie odczytanych indeksow o 1 (w plikach indeksowanie zaczyna sie od 1, a nie od 0)
 			verIndexes.push_back(a - 1);
 			verIndexes.push_back(b - 1);
 			verIndexes.push_back(c - 1);
@@ -60,53 +64,57 @@ ObjLoader::ObjLoader(std::string filenName)
 	file.close();
 }
 
-void ObjLoader::create()
+void ObjLoader::create(double offset_x, double offset_y, double offset_z)
 {
-	vertex a, b, c;
-	vt x, y, z;
-	GLint vertexIndex1;
-	GLint vertexIndex2;
-	GLint vertexIndex3;
-	GLint textureIndex1;
-	GLint textureIndex2;
-	GLint textureIndex3;
-	glBegin(GL_TRIANGLES);
-	for (int i = 0; i < vertexIndexes.size(); i++)
+	if (!isObjectCreated)
 	{
-		vertexIndex1 = (vertexIndexes[i])[0];
-		vertexIndex2 = (vertexIndexes[i])[1];
-		vertexIndex3 = (vertexIndexes[i])[2];
-		textureIndex1 = (textureIndexes[i][0]);
-		textureIndex2 = (textureIndexes[i][1]);
-		textureIndex3 = (textureIndexes[i][2]);
+		vertex a, b, c;
+		vt x, y, z;
+		GLint vertexIndex1;
+		GLint vertexIndex2;
+		GLint vertexIndex3;
+		GLint textureIndex1;
+		GLint textureIndex2;
+		GLint textureIndex3;
+		glBegin(GL_TRIANGLES);
+		for (int i = 0; i < vertexIndexes.size(); i++)
+		{
+			vertexIndex1 = (vertexIndexes[i])[0];
+			vertexIndex2 = (vertexIndexes[i])[1];
+			vertexIndex3 = (vertexIndexes[i])[2];
+			textureIndex1 = (textureIndexes[i][0]);
+			textureIndex2 = (textureIndexes[i][1]);
+			textureIndex3 = (textureIndexes[i][2]);
 
-		a.x = (vertexCoordinates[vertexIndex1])[0];
-		a.y = (vertexCoordinates[vertexIndex1])[1];
-		a.z = (vertexCoordinates[vertexIndex1])[2];
+			a.x = (vertexCoordinates[vertexIndex1])[0];
+			a.y = (vertexCoordinates[vertexIndex1])[1];
+			a.z = (vertexCoordinates[vertexIndex1])[2];
 
-		b.x = (vertexCoordinates[vertexIndex2])[0];
-		b.y = (vertexCoordinates[vertexIndex2])[1];
-		b.z = (vertexCoordinates[vertexIndex2])[2];
+			b.x = (vertexCoordinates[vertexIndex2])[0];
+			b.y = (vertexCoordinates[vertexIndex2])[1];
+			b.z = (vertexCoordinates[vertexIndex2])[2];
 
-		c.x = (vertexCoordinates[vertexIndex3])[0];
-		c.y = (vertexCoordinates[vertexIndex3])[1];
-		c.z = (vertexCoordinates[vertexIndex3])[2];
+			c.x = (vertexCoordinates[vertexIndex3])[0];
+			c.y = (vertexCoordinates[vertexIndex3])[1];
+			c.z = (vertexCoordinates[vertexIndex3])[2];
 
-		x.s = (textureCoordinates[textureIndex1][0]);
-		x.t = (textureCoordinates[textureIndex1][1]);
+			x.s = (textureCoordinates[textureIndex1][0]);
+			x.t = (textureCoordinates[textureIndex1][1]);
 
-		y.s = (textureCoordinates[textureIndex2][0]);
-		y.t = (textureCoordinates[textureIndex2][1]);
+			y.s = (textureCoordinates[textureIndex2][0]);
+			y.t = (textureCoordinates[textureIndex2][1]);
 
-		z.s = (textureCoordinates[textureIndex3][0]);
-		z.t = (textureCoordinates[textureIndex3][1]);
+			z.s = (textureCoordinates[textureIndex3][0]);
+			z.t = (textureCoordinates[textureIndex3][1]);
 
-		glTexCoord2f(x.s, x.t);
-		glVertex3f(a.x, a.y, a.z);
-		glTexCoord2f(y.s, y.t);
-		glVertex3f(b.x, b.y, b.z);
-		glTexCoord2f(z.s, z.t);
-		glVertex3f(c.x, c.y, c.z);
+			glTexCoord2f(x.s + offset_x, x.t + offset_y);
+			glVertex3f(a.x + offset_x, a.y + offset_y, a.z + offset_z);
+			glTexCoord2f(y.s + offset_x, y.t + offset_y);
+			glVertex3f(b.x + offset_x, b.y + offset_y, b.z + offset_z);
+			glTexCoord2f(z.s + offset_x, z.t + offset_y);
+			glVertex3f(c.x + offset_x, c.y + offset_y, c.z + offset_z);
+		}
+		glEnd();
+		isObjectCreated = true;
 	}
-	glEnd();
 }
