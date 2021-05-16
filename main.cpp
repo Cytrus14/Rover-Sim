@@ -1,10 +1,13 @@
+#define radian 57.29578
 #include <Windows.h>
+#include <math.h>
 #include "Rover.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include "ObjLoader.h"
 
-
+float temp = 0;
+float temp2 = 0;
 // angle of rotation for the camera direction
 float angle = 0.0;
 // actual vector representing the camera's direction
@@ -15,6 +18,16 @@ float x = 0.0f, z = 5.0f, y = 0.0f;
 float red, green, blue;
 
 unsigned int textures[4];
+
+//rover coordinates or rotation
+float start_pos_x = 0;
+float start_pos_z = 0;
+float rotation_angle = 0.0;
+
+//rover velocity
+float velocity_L = 0.0;
+float velocity_R = 0.0;
+
 
 void changeSize(int w, int h) {
 
@@ -80,6 +93,24 @@ void processSpecialKeys(int key, int xx, int yy) {
 	}
 }
 
+void processKeyboardKeys(unsigned char key, int x, int y)
+{
+	switch (key){
+	case 'w':
+		velocity_L += 0.1;
+		break;
+	case 's':
+		velocity_L -= 0.1;
+		break;
+	case 'a':
+		rotation_angle += 3;
+		break;
+	case 'd':
+		rotation_angle -= 3;
+		break;
+	}
+}
+
 
 void renderScene(void) {
 
@@ -93,8 +124,6 @@ void renderScene(void) {
 	gluLookAt(x, y, z, x + lx, y + ly, z + lz, 0.0f, 1.0f, 0.0f);
 
 	//creating objects
-	Rover rover1;
-	rover1.create();
 
 	glEnable(GL_TEXTURE_2D);
 
@@ -126,7 +155,25 @@ void renderScene(void) {
 	ObjLoader artifactSphere("Objects\\artifact_sphere.obj");
 	artifactSphere.create(-125, -35, -180);
 
+	glDisable(GL_TEXTURE_2D);
+	glPushMatrix();
 
+	//calculating the rover's position
+	//rover origin = (2, 0, -2.25)
+	int rotationAxisOffset;
+	glMatrixMode(GL_MODELVIEW);
+	std::cout << (cos(rotation_angle / radian) * velocity_L) << "\t" << (sin(rotation_angle / radian) * velocity_L) << "\n";
+	start_pos_x += cos(rotation_angle / radian) * velocity_L;
+	start_pos_z += -sin(rotation_angle / radian) * velocity_L;
+	glTranslatef(start_pos_x + 2, 0, start_pos_z - 2.25);
+	glRotatef(rotation_angle, 0, 1, 0);
+	glTranslatef(-start_pos_x - 2, 0, -start_pos_z + 2.25);
+	glTranslatef(start_pos_x, 0, start_pos_z);
+	//Cylinder c1;
+	//c1.create(6, 2, 10, 0.1, 0, 0, 0.2);
+	Rover rover1;
+	rover1.create();
+	glPopMatrix();
 	glutSwapBuffers();
 }
 
@@ -147,6 +194,7 @@ int main(int argc, char** argv) {
 
 	// here are the new entries
 	glutSpecialFunc(processSpecialKeys);
+	glutKeyboardFunc(processKeyboardKeys);
 
 	// OpenGL init
 	glEnable(GL_DEPTH_TEST);
