@@ -162,7 +162,6 @@ void renderScene(void) {
 	//rover origin = (2, 0, -2.25)
 	int rotationAxisOffset;
 	glMatrixMode(GL_MODELVIEW);
-	std::cout << (cos(rotation_angle / radian) * velocity_L) << "\t" << (sin(rotation_angle / radian) * velocity_L) << "\n";
 	start_pos_x += cos(rotation_angle / radian) * velocity_L;
 	start_pos_z += -sin(rotation_angle / radian) * velocity_L;
 	glTranslatef(start_pos_x + 2, 0, start_pos_z - 2.25);
