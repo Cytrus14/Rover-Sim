@@ -17,16 +17,24 @@ float red, green, blue;
 
 unsigned int textures[4];
 
-//rover coordinates or rotation
+//rover's x and y coordinates
 float start_pos_x = 0;
 float start_pos_z = 0;
-float rotation_angle = 0.0;
-float rotation_axis;
 
-//rover velocity
+//rover's rotation variables
+float wheels_angle = 0.0;
+float rover_angle = 0.0;
+float rotation_axis = 0.0;
+
+//rover velocities
 float velocity = 0.0;
 float angular_velocity = 0.0;
-float temp = 0.0;
+
+void timerCallback(int value)
+{
+	glutTimerFunc(50, timerCallback, 0);
+	velocity = 0.97 * velocity;
+}
 
 
 void changeSize(int w, int h) {
@@ -97,18 +105,20 @@ void processKeyboardKeys(unsigned char key, int x, int y)
 {
 	switch (key){
 	case 'w':
-		velocity -= 0.1;
+		if(velocity > -0.5)
+			velocity -= 0.02;
 		break;
 	case 's':
-		velocity += 0.1;
+		if (velocity < 0.5)
+			velocity += 0.02;
 		break;
 	case 'd':
-		if(rotation_angle > -40)
-			rotation_angle -= 3;
+		if(wheels_angle > -40)
+			wheels_angle -= 3;
 		break;
 	case 'a':
-		if(rotation_angle < 40)
-			rotation_angle += 3;
+		if(wheels_angle < 40)
+			wheels_angle += 3;
 		break;
 	}
 }
@@ -158,15 +168,15 @@ void renderScene(void) {
 	artifactSphere.create(-125, -35, -180);
 
 	glDisable(GL_TEXTURE_2D);
+	
 	glPushMatrix();
-
 	//calculating the rover's position
 	//rover origin = (2, 0, -2.25)
 	glMatrixMode(GL_MODELVIEW);
-	std::cout << rotation_angle << "\t" << rotation_axis<< "\t" <<angular_velocity <<"\n" ;
-	if (rotation_angle != 0)
+	std::cout << rover_angle << "\t" << rotation_axis<< "\t" <<angular_velocity <<"\t" << velocity <<"\n" ;
+	if (wheels_angle != 0)
 	{
-		rotation_axis = 1.9 / tan(rotation_angle / radian);
+		rotation_axis = 1.9 / tan(wheels_angle / radian);
 		angular_velocity = -velocity / rotation_axis;
 	}
 	else
@@ -174,17 +184,15 @@ void renderScene(void) {
 		rotation_axis = 0;
 		angular_velocity = 0;
 	}
-	temp += angular_velocity;
-	start_pos_x += cos(temp) * velocity;
-	start_pos_z += -sin(temp) * velocity;
+	rover_angle += angular_velocity;
+	start_pos_x += cos(rover_angle) * velocity;
+	start_pos_z += -sin(rover_angle) * velocity;
 	glTranslatef(start_pos_x + 3.2, 0, start_pos_z - 2);
-	glRotatef(temp*radian, 0, 1, 0);
+	glRotatef(rover_angle*radian, 0, 1, 0);
 	glTranslatef(-start_pos_x - 3.2, 0, -start_pos_z + 2);
 	glTranslatef(start_pos_x, 0, start_pos_z);
-	//Cylinder c1;
-	//c1.create(6, 1, 10, 0.1, 3.2, 1.1, -10);
 	Rover rover1;
-	rover1.create(rotation_angle);
+	rover1.create(wheels_angle);
 	glPopMatrix();
 	glutSwapBuffers();
 }
@@ -254,6 +262,8 @@ int main(int argc, char** argv) {
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	//configuring timer
+	glutTimerFunc(50, timerCallback, 0);
 	// enter GLUT event processing cycle
 	glutMainLoop();
 
