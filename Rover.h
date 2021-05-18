@@ -16,7 +16,7 @@ class Rover
 	Cuboid* head;
 	Cylinder* camera;
 public:
-	void create();
+	void create(float wheels_angle);
 	~Rover();
 };
 

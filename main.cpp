@@ -6,8 +6,6 @@
 #include "stb_image.h"
 #include "ObjLoader.h"
 
-float temp = 0;
-float temp2 = 0;
 // angle of rotation for the camera direction
 float angle = 0.0;
 // actual vector representing the camera's direction
@@ -23,10 +21,12 @@ unsigned int textures[4];
 float start_pos_x = 0;
 float start_pos_z = 0;
 float rotation_angle = 0.0;
+float rotation_axis;
 
 //rover velocity
-float velocity_L = 0.0;
-float velocity_R = 0.0;
+float velocity = 0.0;
+float angular_velocity = 0.0;
+float temp = 0.0;
 
 
 void changeSize(int w, int h) {
@@ -97,16 +97,18 @@ void processKeyboardKeys(unsigned char key, int x, int y)
 {
 	switch (key){
 	case 'w':
-		velocity_L += 0.1;
+		velocity -= 0.1;
 		break;
 	case 's':
-		velocity_L -= 0.1;
-		break;
-	case 'a':
-		rotation_angle += 3;
+		velocity += 0.1;
 		break;
 	case 'd':
-		rotation_angle -= 3;
+		if(rotation_angle > -40)
+			rotation_angle -= 3;
+		break;
+	case 'a':
+		if(rotation_angle < 40)
+			rotation_angle += 3;
 		break;
 	}
 }
@@ -160,18 +162,29 @@ void renderScene(void) {
 
 	//calculating the rover's position
 	//rover origin = (2, 0, -2.25)
-	int rotationAxisOffset;
 	glMatrixMode(GL_MODELVIEW);
-	start_pos_x += cos(rotation_angle / radian) * velocity_L;
-	start_pos_z += -sin(rotation_angle / radian) * velocity_L;
-	glTranslatef(start_pos_x + 2, 0, start_pos_z - 2.25);
-	glRotatef(rotation_angle, 0, 1, 0);
-	glTranslatef(-start_pos_x - 2, 0, -start_pos_z + 2.25);
+	std::cout << rotation_angle << "\t" << rotation_axis<< "\t" <<angular_velocity <<"\n" ;
+	if (rotation_angle != 0)
+	{
+		rotation_axis = 1.9 / tan(rotation_angle / radian);
+		angular_velocity = -velocity / rotation_axis;
+	}
+	else
+	{
+		rotation_axis = 0;
+		angular_velocity = 0;
+	}
+	temp += angular_velocity;
+	start_pos_x += cos(temp) * velocity;
+	start_pos_z += -sin(temp) * velocity;
+	glTranslatef(start_pos_x + 3.2, 0, start_pos_z - 2);
+	glRotatef(temp*radian, 0, 1, 0);
+	glTranslatef(-start_pos_x - 3.2, 0, -start_pos_z + 2);
 	glTranslatef(start_pos_x, 0, start_pos_z);
 	//Cylinder c1;
-	//c1.create(6, 2, 10, 0.1, 0, 0, 0.2);
+	//c1.create(6, 1, 10, 0.1, 3.2, 1.1, -10);
 	Rover rover1;
-	rover1.create();
+	rover1.create(rotation_angle);
 	glPopMatrix();
 	glutSwapBuffers();
 }

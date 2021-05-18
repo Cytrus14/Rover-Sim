@@ -1,12 +1,20 @@
 #include "Rover.h"
 
-void Rover::create()
+void Rover::create(float wheels_angle)
 {
 	wheels = new Wheel[6];
+	glPushMatrix();
+	glRotatef(wheels_angle, 0, 1, 0);
 	wheels[0].create(0, 0, 0);
+	glPopMatrix();
 	wheels[1].create(2.5, 0, 0);
 	wheels[2].create(4, 0, 0);
+	glPushMatrix();
+	glTranslatef(0, 0, -4);
+	glRotatef(wheels_angle, 0, 1, 0);
+	glTranslatef(0, 0, 4);
 	wheels[3].create(0, 0, -4);
+	glPopMatrix();
 	wheels[4].create(2.5, 0, -4);
 	wheels[5].create(4, 0, -4);
 
