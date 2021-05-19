@@ -18,13 +18,13 @@ float red, green, blue;
 unsigned int textures[4];
 
 //rover's x and y coordinates
-float start_pos_x = 0;
-float start_pos_z = 0;
+float rover_pos_x = 0;
+float rover_pos_z = 0;
 
 //rover's rotation variables
 float wheels_angle = 0.0;
 float rover_angle = 0.0;
-float rotation_axis = 0.0;
+float rotation_radius = 0.0;
 
 //rover velocities
 float velocity = 0.0;
@@ -114,11 +114,11 @@ void processKeyboardKeys(unsigned char key, int x, int y)
 		break;
 	case 'd':
 		if(wheels_angle > -40)
-			wheels_angle -= 3;
+			wheels_angle -= 3.0;
 		break;
 	case 'a':
 		if(wheels_angle < 40)
-			wheels_angle += 3;
+			wheels_angle += 3.0;
 		break;
 	}
 }
@@ -173,24 +173,23 @@ void renderScene(void) {
 	//calculating the rover's position
 	//rover origin = (2, 0, -2.25)
 	glMatrixMode(GL_MODELVIEW);
-	std::cout << rover_angle << "\t" << rotation_axis<< "\t" <<angular_velocity <<"\t" << velocity <<"\n" ;
 	if (wheels_angle != 0)
 	{
-		rotation_axis = 1.9 / tan(wheels_angle / radian);
-		angular_velocity = -velocity / rotation_axis;
+		rotation_radius = 1.9 / tan(wheels_angle / radian);
+		angular_velocity = -velocity / rotation_radius;
 	}
 	else
 	{
-		rotation_axis = 0;
+		rotation_radius = 0;
 		angular_velocity = 0;
 	}
 	rover_angle += angular_velocity;
-	start_pos_x += cos(rover_angle) * velocity;
-	start_pos_z += -sin(rover_angle) * velocity;
-	glTranslatef(start_pos_x + 3.2, 0, start_pos_z - 2);
+	rover_pos_x += cos(rover_angle) * velocity;
+	rover_pos_z += -sin(rover_angle) * velocity;
+	glTranslatef(rover_pos_x + 3.2, 0, rover_pos_z - 2);
 	glRotatef(rover_angle*radian, 0, 1, 0);
-	glTranslatef(-start_pos_x - 3.2, 0, -start_pos_z + 2);
-	glTranslatef(start_pos_x, 0, start_pos_z);
+	glTranslatef(-rover_pos_x - 3.2, 0, -rover_pos_z + 2);
+	glTranslatef(rover_pos_x, 0, rover_pos_z);
 	Rover rover1;
 	rover1.create(wheels_angle);
 	glPopMatrix();
