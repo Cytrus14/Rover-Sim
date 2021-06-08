@@ -7,7 +7,7 @@ ObjLoader::ObjLoader(std::string filenName)
 	GLfloat x, y, z;
 	GLint a, b, c;
 	char temp;
-	while (getline(file,str))
+	while (getline(file, str))
 	{
 		//odczytywanie koordynatow wierzcholkow
 		if (str.substr(0, 2) == "v ")
@@ -115,6 +115,5 @@ void ObjLoader::create(double offset_x, double offset_y, double offset_z)
 			glVertex3f(c.x + offset_x, c.y + offset_y, c.z + offset_z);
 		}
 		glEnd();
-		isObjectCreated = true;
 	}
 }

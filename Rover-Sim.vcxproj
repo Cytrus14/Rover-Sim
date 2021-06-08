@@ -26,6 +26,7 @@
     <ClCompile Include="ObjLoader.cpp" />
     <ClCompile Include="Rover.cpp" />
     <ClCompile Include="SideAxis.cpp" />
+    <ClCompile Include="Surface.cpp" />
     <ClCompile Include="Wheel.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -35,6 +36,7 @@
     <ClInclude Include="ObjLoader.h" />
     <ClInclude Include="Rover.h" />
     <ClInclude Include="SideAxis.h" />
+    <ClInclude Include="Surface.h" />
     <ClInclude Include="Wheel.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -114,6 +116,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\libraries</AdditionalLibraryDirectories>
       <AdditionalDependencies>glut32.lib;OPENGL32.LIB;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <StackReserveSize>33554432</StackReserveSize>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

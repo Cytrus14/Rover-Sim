@@ -8,10 +8,14 @@
 
 using namespace std;
 
-class ObjLoader
+class Surface
 {
 public:
-	float vertecies[50][50];
+	float Zmin;
+	float Zmiddle;
+	float Zmax;
+	float minmax[3][2];
+	float points[600][600];
 	struct vertex
 	{
 		float x;
@@ -23,8 +27,12 @@ public:
 		float s;
 		float t;
 	};
-	ObjLoader(std::string fileName);
+	Surface(std::string fileName);
 	void create(double offset_x = 0, double offset_y = 0, double offset_z = 0);
+	void min2(float x1, float x2, float x3, float z1, float z2, float z3);
+	void middle(float x1, float x2, float x3, float z1, float z2, float z3);
+	void max2(float x1, float x2, float x3, float z1, float z2, float z3);
+	void isInside(float x1, float x2, float x3, float z1, float z2, float z3, float y1, float y2, float y3);
 private:
 	vector<vector<GLfloat>> vertexCoordinates;
 	vector<vector<GLint>> vertexIndexes;
