@@ -6,6 +6,9 @@
 #include "stb_image.h"
 #include "ObjLoader.h"
 #include "Surface.h"
+#include <chrono>
+#include <vector>
+#include <algorithm>
 
 // angle of rotation for the camera direction
 float angle = 0.0;
@@ -42,11 +45,23 @@ Surface terrain("Objects\\surface_test.obj");
 ObjLoader artifactBase("Objects\\artifact_base.obj");
 ObjLoader artifactRods("Objects\\artifact_rods.obj");
 ObjLoader artifactSphere("Objects\\artifact_sphere.obj");
+ObjLoader collectible1("Objects\\collectible.obj");
+ObjLoader collectible2("Objects\\collectible.obj");
+ObjLoader collectible3("Objects\\collectible.obj");
 
 //colision points
 float front[] = { -2.5, -0.9, -2.25 };
 float back[] = { 3.5,-0.9,-2.25 };
 
+//collectibles
+float collectibleRotation = 0;
+int collectibleCount = 3;
+bool isCollectibleCollected[3] = { false, true, false };
+std::chrono::time_point<std::chrono::system_clock> start, finish;
+
+//score
+vector<double> bestScores;
+vector<string> scoreStrings;
 //collision function
 bool collisionDetection()
 {
@@ -67,6 +82,7 @@ void timerCallback(int value)
 {
 	glutTimerFunc(50, timerCallback, 0);
 	velocity = 0.97 * velocity;
+	collectibleRotation += 10;
 }
 
 
@@ -95,6 +111,60 @@ void changeSize(int w, int h) {
 	glMatrixMode(GL_MODELVIEW);
 }
 
+void setOrthographicProjection() {
+
+	// switch to projection mode
+	glMatrixMode(GL_PROJECTION);
+
+	// save previous matrix which contains the
+	//settings for the perspective projection
+	glPushMatrix();
+
+	// reset matrix
+	glLoadIdentity();
+
+	// set a 2D orthographic projection
+	gluOrtho2D(0, glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT), 0); //############
+
+	// switch back to modelview mode
+	glMatrixMode(GL_MODELVIEW);
+}
+
+void restorePerspectiveProjection() {
+
+	glMatrixMode(GL_PROJECTION);
+	// restore previous projection matrix
+	glPopMatrix();
+
+	// get back to modelview mode
+	glMatrixMode(GL_MODELVIEW);
+}
+
+void renderSpacedBitmapString(
+
+	float x,
+	float y,
+	void* font,
+	string str) {
+
+	char* c;
+	char* charStr = new char[str.length() + 1];
+	int x1 = x;
+	int i = 0;
+	for (; i < str.length(); i++)
+	{
+		charStr[i] = str.at(i);
+	}
+	charStr[i] = '\0';
+
+	for (c = charStr; *c != '\0'; c++) {
+
+		glRasterPos2f(x1, y);
+		glutBitmapCharacter(font, *c);
+		x1 = x1 + glutBitmapWidth(font, *c);
+	}
+	delete[] charStr;
+}
 
 void processSpecialKeys(int key, int xx, int yy) {
 
@@ -169,6 +239,86 @@ void renderScene(void) {
 	gluLookAt(x, y, z, x + lx, y + ly, z + lz, 0.0f, 1.0f, 0.0f);
 
 	//creating objects
+	glColor3f(1, 0.84, 0.0);
+
+	glMatrixMode(GL_MODELVIEW);
+
+	//handling collectibles
+	if (abs(rover_pos_x + 60) < 7 && abs(rover_pos_z + 25) < 7)
+		isCollectibleCollected[0] = true;
+	if (abs(rover_pos_x + 100) < 7 && abs(rover_pos_z - 55) < 7)
+		isCollectibleCollected[1] = true;
+	if (abs(rover_pos_x + 130) < 7 && abs(rover_pos_z + 110) < 7)
+		isCollectibleCollected[2] = true;
+
+	if(isCollectibleCollected[0])
+	{
+		finish = std::chrono::system_clock::now();
+		std::chrono::duration<double> elapsed_time = finish - start;
+		std::cout << elapsed_time.count() << "\n";
+		rover_pos_x = 0;
+		rover_pos_z = 0;
+		rover_angle = 0;
+		velocity = 0;
+		for (int i = 0; i < collectibleCount; i++)
+		{
+			isCollectibleCollected[i] = false;
+		}
+		front[0] = -2.5;
+		front[1] = -0.9;
+		front[2] = -2.25;
+		back[0] = 3.5;
+		back[1] = -0.9;
+		back[2] = -2.25;
+
+		//adding do score board
+		bestScores.push_back(elapsed_time.count());
+		std::sort(bestScores.begin(), bestScores.end());
+		int i = 0;
+		int temp;
+		if (bestScores.size() <= 3)
+			temp = bestScores.size();
+		else
+			temp = 3;
+		while (i < temp)
+		{
+			scoreStrings.at(i) = (to_string(bestScores.at(i)));
+			if (i > 2)
+				break;
+			i++;
+		}
+		//reseting the clock
+		start = std::chrono::system_clock::now();
+	}
+
+	if (!isCollectibleCollected[0])
+	{
+		glPushMatrix();
+		glTranslatef(-60, -45, -25);
+		glRotatef(collectibleRotation, 0, 1, 0);
+		glTranslatef(60, 45, 25);
+		collectible1.create(-60, -45, -25);
+		glPopMatrix();
+	}
+	if (!isCollectibleCollected[1])
+	{
+		glPushMatrix();
+		glTranslatef(-100, -55, 90);
+		glRotatef(collectibleRotation, 0, 1, 0);
+		glTranslatef(100, 55, -90);
+		collectible2.create(-100, -55, 90);
+		glPopMatrix();
+	}
+
+	if (!isCollectibleCollected[2])
+	{
+		glPushMatrix();
+		glTranslatef(-130, -55, -110);
+		glRotatef(collectibleRotation, 0, 1, 0);
+		glTranslatef(130, 55, 110);
+		collectible3.create(-130, -50, -110);
+		glPopMatrix();
+	}
 
 	glEnable(GL_TEXTURE_2D);
 	glColor3f(0.8, 0.8, 0.8);
@@ -232,7 +382,6 @@ void renderScene(void) {
 	//calculating the rover's position
 	//rover origin = (2, 0, -2.25)
 	isColiding = collisionDetection();
-	std::cout << isColiding << '\n';
 	if (terrain.points[int(front[0]) + 300][int(front[2]) + 300] < front[1] && terrain.points[int(back[0]) + 300][int(back[2]) + 300] < back[1])
 	{
 		front[1] = terrain.points[int(front[0]) + 300][int(front[2]) + 300];
@@ -294,6 +443,25 @@ void renderScene(void) {
 	Rover rover1;
 	rover1.create(wheels_angle);
 	glPopMatrix();
+
+	//displaying text
+	int y = 15;
+	short int temp;
+	if (bestScores.size() <= 3)
+		temp = bestScores.size();
+	else
+		temp = 3;
+	setOrthographicProjection();
+	glPushMatrix();
+	glLoadIdentity();
+	for (int i = 0; i < temp; i++)
+	{
+		renderSpacedBitmapString(3, y, GLUT_BITMAP_8_BY_13, scoreStrings.at(i));
+		y += 10;
+	}
+	glPopMatrix();
+
+	restorePerspectiveProjection();
 	glutSwapBuffers();
 }
 
@@ -304,7 +472,7 @@ int main(int argc, char** argv) {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(100, 100);
-	glutInitWindowSize(640, 640);
+	glutInitWindowSize(1600,900);
 	glutCreateWindow("Rover Sim");
 
 	// register callbacks
@@ -364,8 +532,11 @@ int main(int argc, char** argv) {
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	//configuring timer
 	glutTimerFunc(50, timerCallback, 0);
-
 	// enter GLUT event processing cycle
+	scoreStrings.push_back("");
+	scoreStrings.push_back("");
+	scoreStrings.push_back("");
+	start = std::chrono::system_clock::now();
 	glutMainLoop();
 
 	return 1;
