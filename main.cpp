@@ -9,6 +9,12 @@
 #include <chrono>
 #include <vector>
 #include <algorithm>
+#include <random>
+
+//setting up rng
+std::random_device rd; // obtain a random number from hardware
+std::mt19937 gen(rd()); // seed the generator
+std::uniform_int_distribution<> distr(100, 500); // define the range
 
 // angle of rotation for the camera direction
 float angle = 0.0;
@@ -49,19 +55,57 @@ ObjLoader collectible1("Objects\\collectible.obj");
 ObjLoader collectible2("Objects\\collectible.obj");
 ObjLoader collectible3("Objects\\collectible.obj");
 
+//collisions
 //colision points
 float front[] = { -2.5, -0.9, -2.25 };
 float back[] = { 3.5,-0.9,-2.25 };
 
+bool isColiding;
+
 //collectibles
-float collectibleRotation = 0;
+struct pos
+{
+	int x;
+	int y;
+	int z;
+};
+vector<pos> collectiblePositions;
+vector<ObjLoader> collectibles;
 int collectibleCount = 3;
-bool isCollectibleCollected[3] = { false, true, false };
+int gatheredCollectibles = 0;
+float collectibleRotation = 0;
+bool* isCollectibleCollected;
 std::chrono::time_point<std::chrono::system_clock> start, finish;
+bool firstSimRun = true;
 
 //score
 vector<double> bestScores;
 vector<string> scoreStrings;
+
+//difficulty
+bool wasDifficultyChanged = false;
+
+//other strings
+string ringsToCollectText = "Collected Rings:";
+string bestTimes = "Best Times:";
+string tempString;
+
+void processMenuEvents(int value)
+{
+	switch (value)
+	{
+	case 1:
+		collectibleCount = 3;
+		break;
+	case 2:
+		collectibleCount = 5;
+		break;
+	case 3:
+		collectibleCount = 10;
+		break;
+	}
+	wasDifficultyChanged = true;
+}
 //collision function
 bool collisionDetection()
 {
@@ -76,7 +120,6 @@ bool collisionDetection()
 	return 1;
 }
 
-bool isColiding;
 
 void timerCallback(int value)
 {
@@ -166,6 +209,76 @@ void renderSpacedBitmapString(
 	delete[] charStr;
 }
 
+void resetSim()
+{
+	finish = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsed_time = finish - start;
+	rover_pos_x = 0;
+	rover_pos_z = 0;
+	rover_angle = 0;
+	velocity = 0;
+	front[0] = -2.5;
+	front[1] = -0.9;
+	front[2] = -2.25;
+	back[0] = 3.5;
+	back[1] = -0.9;
+	back[2] = -2.25;
+
+	//adding time to score board
+	int i = 0;
+	if (!firstSimRun && !wasDifficultyChanged)
+	{
+		delete[] isCollectibleCollected;
+		bestScores.push_back(elapsed_time.count());
+		std::sort(bestScores.begin(), bestScores.end());
+		int temp;
+		if (bestScores.size() <= 3)
+			temp = bestScores.size();
+		else
+			temp = 3;
+		while (i < temp)
+		{
+			scoreStrings.at(i) = (to_string(bestScores.at(i)));
+			if (i > 2)
+				break;
+			i++;
+		}
+	}
+	isCollectibleCollected = new bool[collectibleCount];
+	//reseting the clock
+	start = std::chrono::system_clock::now();
+	//handling collectibles
+	collectiblePositions.clear();
+	collectibles.clear();
+	//generating new collectible positions
+	pos collectibleTempPos;
+	for (i = 0; i < collectibleCount; i++)
+	{
+		collectibleTempPos.x = distr(gen);
+		collectibleTempPos.z = distr(gen);
+		if (terrain.points[collectibleTempPos.x][collectibleTempPos.z] < 80 && terrain.points[collectibleTempPos.x][collectibleTempPos.z]!=0)
+		{
+			collectibleTempPos.y = terrain.points[collectibleTempPos.x][collectibleTempPos.z];
+			collectibleTempPos.x -= 300;
+			collectibleTempPos.z -= 300;
+			collectiblePositions.push_back(collectibleTempPos);
+		}
+		else
+		{
+			i--;
+		}
+	}
+
+	ObjLoader tempCollectible("Objects\\collectible.obj");
+	for (i = 0; i < collectibleCount; i++)
+	{
+		collectibles.push_back(tempCollectible);
+		isCollectibleCollected[i] = false;
+
+	}
+	std::cout << collectibleCount << "\n";
+}
+
 void processSpecialKeys(int key, int xx, int yy) {
 
 	float fraction = 3.0f;
@@ -239,86 +352,38 @@ void renderScene(void) {
 	gluLookAt(x, y, z, x + lx, y + ly, z + lz, 0.0f, 1.0f, 0.0f);
 
 	//creating objects
-	glColor3f(1, 0.84, 0.0);
 
 	glMatrixMode(GL_MODELVIEW);
 
-	//handling collectibles
-	if (abs(rover_pos_x + 60) < 7 && abs(rover_pos_z + 25) < 7)
-		isCollectibleCollected[0] = true;
-	if (abs(rover_pos_x + 100) < 7 && abs(rover_pos_z - 55) < 7)
-		isCollectibleCollected[1] = true;
-	if (abs(rover_pos_x + 130) < 7 && abs(rover_pos_z + 110) < 7)
-		isCollectibleCollected[2] = true;
 
-	if(isCollectibleCollected[0])
-	{
-		finish = std::chrono::system_clock::now();
-		std::chrono::duration<double> elapsed_time = finish - start;
-		std::cout << elapsed_time.count() << "\n";
-		rover_pos_x = 0;
-		rover_pos_z = 0;
-		rover_angle = 0;
-		velocity = 0;
-		for (int i = 0; i < collectibleCount; i++)
-		{
-			isCollectibleCollected[i] = false;
-		}
-		front[0] = -2.5;
-		front[1] = -0.9;
-		front[2] = -2.25;
-		back[0] = 3.5;
-		back[1] = -0.9;
-		back[2] = -2.25;
+	//if (!isCollectibleCollected[0])
+	//{
+	//	glPushMatrix();
+	//	glTranslatef(-60, -45, -25);
+	//	glRotatef(collectibleRotation, 0, 1, 0);
+	//	glTranslatef(60, 45, 25);
+	//	collectible1.create(-60, -45, -25);
+	//	glPopMatrix();
+	//}
+	//if (!isCollectibleCollected[1])
+	//{
+	//	glPushMatrix();
+	//	glTranslatef(-100, -55, 90);
+	//	glRotatef(collectibleRotation, 0, 1, 0);
+	//	glTranslatef(100, 55, -90);
+	//	collectible2.create(-100, -55, 90);
+	//	glPopMatrix();
+	//}
 
-		//adding do score board
-		bestScores.push_back(elapsed_time.count());
-		std::sort(bestScores.begin(), bestScores.end());
-		int i = 0;
-		int temp;
-		if (bestScores.size() <= 3)
-			temp = bestScores.size();
-		else
-			temp = 3;
-		while (i < temp)
-		{
-			scoreStrings.at(i) = (to_string(bestScores.at(i)));
-			if (i > 2)
-				break;
-			i++;
-		}
-		//reseting the clock
-		start = std::chrono::system_clock::now();
-	}
-
-	if (!isCollectibleCollected[0])
-	{
-		glPushMatrix();
-		glTranslatef(-60, -45, -25);
-		glRotatef(collectibleRotation, 0, 1, 0);
-		glTranslatef(60, 45, 25);
-		collectible1.create(-60, -45, -25);
-		glPopMatrix();
-	}
-	if (!isCollectibleCollected[1])
-	{
-		glPushMatrix();
-		glTranslatef(-100, -55, 90);
-		glRotatef(collectibleRotation, 0, 1, 0);
-		glTranslatef(100, 55, -90);
-		collectible2.create(-100, -55, 90);
-		glPopMatrix();
-	}
-
-	if (!isCollectibleCollected[2])
-	{
-		glPushMatrix();
-		glTranslatef(-130, -55, -110);
-		glRotatef(collectibleRotation, 0, 1, 0);
-		glTranslatef(130, 55, 110);
-		collectible3.create(-130, -50, -110);
-		glPopMatrix();
-	}
+	//if (!isCollectibleCollected[2])
+	//{
+	//	glPushMatrix();
+	//	glTranslatef(-130, -55, -110);
+	//	glRotatef(collectibleRotation, 0, 1, 0);
+	//	glTranslatef(130, 55, 110);
+	//	collectible3.create(-130, -50, -110);
+	//	glPopMatrix();
+	//}
 
 	glEnable(GL_TEXTURE_2D);
 	glColor3f(0.8, 0.8, 0.8);
@@ -333,6 +398,46 @@ void renderScene(void) {
 
 	glBindTexture(GL_TEXTURE_2D, textures[1]);
 	terrain.create(0,0,0);
+
+	//handling collectibles
+	//if (abs(rover_pos_x + 60) < 7 && abs(rover_pos_z + 25) < 7)
+	//	isCollectibleCollected[0] = true;
+	//if (abs(rover_pos_x + 100) < 7 && abs(rover_pos_z - 55) < 7)
+	//	isCollectibleCollected[1] = true;
+	//if (abs(rover_pos_x + 130) < 7 && abs(rover_pos_z + 110) < 7)
+	//	isCollectibleCollected[2] = true;
+
+	if (gatheredCollectibles == collectibleCount || firstSimRun || wasDifficultyChanged)
+	{
+		resetSim();
+		firstSimRun = false;
+		wasDifficultyChanged = false;
+	}
+	glDisable(GL_TEXTURE_2D);
+	glColor3f(1, 0.84, 0.0);
+	for (int i = 0; i < collectibleCount; i++)
+	{
+		if (!isCollectibleCollected[i])
+		{
+			glPushMatrix();
+			glTranslatef(collectiblePositions.at(i).x, collectiblePositions.at(i).y + 4, collectiblePositions.at(i).z);
+			glRotatef(collectibleRotation, 0, 1, 0);
+			glTranslatef(-collectiblePositions.at(i).x, -(collectiblePositions.at(i).y + 4), -collectiblePositions.at(i).z);
+			collectibles.at(i).create(collectiblePositions.at(i).x, collectiblePositions.at(i).y + 4, collectiblePositions.at(i).z);
+			glPopMatrix();
+		}
+	}
+
+	gatheredCollectibles = 0;
+	for (int i = 0; i < collectibleCount; i++)
+	{
+		if (abs((collectiblePositions.at(i).x) - (rover_pos_x)) < 7 && abs((collectiblePositions.at(i).z) -(rover_pos_z)) < 7)
+			isCollectibleCollected[i] = true;
+		if (isCollectibleCollected[i])
+			gatheredCollectibles++;
+	}
+	glEnable(GL_TEXTURE_2D);
+	glColor3f(0.8, 0.8, 0.8);
 	//generating invisible walls
 	for (int i = -150; i <= -100; i++)
 		for (int j = -200; j <= -151; j++)
@@ -454,10 +559,23 @@ void renderScene(void) {
 	setOrthographicProjection();
 	glPushMatrix();
 	glLoadIdentity();
+	tempString = to_string(gatheredCollectibles);
+	renderSpacedBitmapString(3, y, GLUT_BITMAP_8_BY_13, ringsToCollectText);
+	renderSpacedBitmapString(135, y, GLUT_BITMAP_8_BY_13, tempString);
+	tempString = "/";
+	renderSpacedBitmapString(145, y, GLUT_BITMAP_8_BY_13, tempString);
+	tempString = to_string(collectibleCount);
+	renderSpacedBitmapString(155, y, GLUT_BITMAP_8_BY_13, tempString);
+	y += 25;
+	renderSpacedBitmapString(3, y, GLUT_BITMAP_8_BY_13, bestTimes);
 	for (int i = 0; i < temp; i++)
 	{
-		renderSpacedBitmapString(3, y, GLUT_BITMAP_8_BY_13, scoreStrings.at(i));
-		y += 10;
+		y += 15;
+		tempString = scoreStrings.at(i);
+		if(tempString.length() > 0)
+			tempString.append(" s");
+		renderSpacedBitmapString(3, y, GLUT_BITMAP_8_BY_13, tempString);
+		tempString.clear();
 	}
 	glPopMatrix();
 
@@ -474,6 +592,14 @@ int main(int argc, char** argv) {
 	glutInitWindowPosition(100, 100);
 	glutInitWindowSize(1600,900);
 	glutCreateWindow("Rover Sim");
+
+	//creating menu
+	int menu;
+	menu = glutCreateMenu(processMenuEvents);
+	glutAddMenuEntry("Easy", 1);
+	glutAddMenuEntry("Medium", 2);
+	glutAddMenuEntry("Hard", 3);
+	glutAttachMenu(GLUT_RIGHT_BUTTON);
 
 	// register callbacks
 	glutDisplayFunc(renderScene);
