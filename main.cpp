@@ -69,20 +69,22 @@ struct pos
 	int y;
 	int z;
 };
-vector<pos> collectiblePositions;
-vector<ObjLoader> collectibles;
-int collectibleCount = 3;
-int gatheredCollectibles = 0;
-float collectibleRotation = 0;
-bool* isCollectibleCollected;
+vector<pos> collectiblePositions; //stores rings' locations
+vector<ObjLoader> collectibles; //stores ring objects
+int collectibleCount = 3; //amount of rings to collect
+int gatheredCollectibles = 0; //amount of rings gathered
+float collectibleRotation = 0; //used for rotating rings
+bool* isCollectibleCollected; //determines whether the given ring was collected
+//time variables used for determining the score
 std::chrono::time_point<std::chrono::system_clock> start, finish;
-bool firstSimRun = true;
+bool firstSimRun = true; //determines whether this is the first start of the game
 
 //score
-vector<double> bestScores;
-vector<string> scoreStrings;
+vector<double> bestScores; //stores the top 3 best scores
+vector<string> scoreStrings; //top 3 best scores as strings
 
 //difficulty
+//determines whether the difficulty was changed
 bool wasDifficultyChanged = false;
 
 //other strings
@@ -250,7 +252,7 @@ void resetSim()
 	//handling collectibles
 	collectiblePositions.clear();
 	collectibles.clear();
-	//generating new collectible positions
+	//generating new collectibles' positions
 	pos collectibleTempPos;
 	for (i = 0; i < collectibleCount; i++)
 	{
@@ -276,7 +278,6 @@ void resetSim()
 		isCollectibleCollected[i] = false;
 
 	}
-	std::cout << collectibleCount << "\n";
 }
 
 void processSpecialKeys(int key, int xx, int yy) {
